@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Outputs
+outputs/
+results/
+*.log
+*.aux
+*.out
+*.toc
+*.synctex.gz
