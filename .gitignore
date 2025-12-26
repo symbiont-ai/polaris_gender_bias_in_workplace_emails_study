@@ -10,11 +10,17 @@ venv/
 # Jupyter
 .ipynb_checkpoints/
 
-# Outputs
-outputs/
-results/
-*.log
+# LaTeX build artifacts
 *.aux
+*.log
 *.out
 *.toc
 *.synctex.gz
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

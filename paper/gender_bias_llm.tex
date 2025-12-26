@@ -25,14 +25,13 @@
 \maketitle
 
 \begin{abstract}
-Large language models (LLMs) are increasingly deployed to draft workplace communications and evaluate employee performance. We present a cross-model experimental design using GPT-5.2 and Gemini 2.0 Flash to disentangle generation bias from evaluation bias. Using 30 matched persona pairs (60 personas total) differing only in gendered names, we generate 720 emails across salary negotiation (S01) and credit attribution (S02) scenarios, yielding ratings under naturalistic, debiased, and blinded conditions.
+Large language models (LLMs) are increasingly used to draft workplace communications and evaluate employee performance. We present a cross-model experimental design using GPT-5.2 and Gemini 2.0 Flash to disentangle generation bias from evaluation bias. Using 30 matched persona pairs differing only in gendered names, we generate 720 emails across salary negotiation and credit attribution scenarios, with ratings under naturalistic, debiased, and blinded conditions.
 
-We find context-dependent bias patterns. In S01 (salary negotiation), we observed no evaluation bias under any condition
-and only limited generation-style differences (one FDR-significant pattern). In S02 (credit attribution), GPT-5.2 generated female emails with softer framing (``wanted to'': 96\% vs.\ 80\%, $p=.002$) and less formal signatures (48\% vs.\ 76\%, $p=.002$); Gemini 2.0 generated female emails with more collaborative framing (``follow-up'': 68\% vs.\ 42\%, $p<.001$). These patterns survived multiple comparison correction; other observed differences did not.
+We find context-dependent bias. In salary negotiation, we observed no evaluation bias and minimal generation differences. In credit attribution, GPT-5.2 generated female emails with softer framing (``wanted to'': $+15.6$ pp, $p=.002$) and less formal signatures ($-27.8$ pp, $p=.002$); Gemini generated female emails with more collaborative framing (``follow-up'': $+25.6$ pp, $p=.001$). Six patterns survived multiple comparison correction.
 
-Using blinded evaluation (names replaced with [SENDER]), we decompose S02 evaluation bias into name-based and style-based components. GPT-5.2's pro-female evaluation bias ($+0.61$) decomposes into name bias ($+0.17$, eliminated by blinding) and style preference ($+0.44$, persists after blinding). Adding ``be objective'' eliminates both ($+0.03$), suggesting potential overcorrection. Gemini 2.0's bias ($+0.28$) is entirely style-based—unaffected by blinding or debiasing.
+Using blinded evaluation (names replaced with [SENDER]), we decompose evaluation bias into name-based and style-based components. GPT-5.2's pro-female bias ($+0.61$) splits into name bias ($+0.17$, eliminated by blinding) and style preference ($+0.44$, persists after blinding). A ``be objective'' prompt eliminates both ($+0.03$), suggesting potential overcorrection. Gemini's bias ($+0.28$) is entirely style-based---unaffected by blinding or debiasing.
 
-Our findings reveal that (1) LLM gender bias is context-dependent, emerging in interpersonal conflict but not salary negotiation, (2) evaluation bias decomposes into distinct name-based and style-based components, and (3) these components require different mitigation strategies.
+Our findings reveal that (1) LLM gender bias is context-dependent, (2) evaluation bias decomposes into distinct name-based and style-based components, and (3) these components require different mitigation strategies.
 \end{abstract}
 
 \section{Introduction}
@@ -69,7 +68,7 @@ Attempts to mitigate LLM bias include prompt engineering \citep{ganguli2023capac
 
 \subsection{Experimental Design}
 
-We employ a 2 (Generator: GPT-5.2, Gemini 2.0 Flash) $\times$ 2 (Evaluator: GPT-5.2, Gemini 2.0 Flash) $\times$ 2 (Prompt Style: Naturalistic, Debiased) design. Each model generates emails that are evaluated by the other model, enabling isolation of generation versus evaluation effects.
+We employ a 2 (Generator: GPT-5.2, Gemini 2.0 Flash) $\times$ 2 (Evaluator: GPT-5.2, Gemini 2.0 Flash) $\times$ 3 (Condition: Naturalistic, Debiased, Blinded) design. Each model generates emails that are evaluated by the other model, enabling isolation of generation versus evaluation effects.
 
 \begin{table}[h]
 \centering
@@ -84,17 +83,13 @@ Total personas & 60 \\
 Scenarios & 2 \\
 Responses per persona-scenario & 3 \\
 Generator models & 2 \\
-\midrule
 Emails per model & 360 \\
 Total emails & 720 \\
-\midrule
 Evaluator conditions & 3 (naturalistic, debiased, blinded) \\
 Total ratings & 2,160 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-Because we generate 3 responses per persona, the persona (not the individual email) is the unit of analysis. All statistical tests aggregate to the persona level ($n=30$ per gender per scenario) to avoid inflating significance through pseudo-replication.
 
 \subsection{Personas}
 
@@ -114,7 +109,7 @@ Emails were generated using a career coach framing:
 \textit{You are a career coach helping your client navigate a workplace situation. Your client is [Name], a machine learning infrastructure engineer. [He/She] has been working in industry for two years. Here is the situation [he/she] is facing: [Scenario text]. Write the actual email response in first person as [first name]. Write only the email, no other commentary.}
 \end{quote}
 
-Each persona--scenario combination was generated 3 times per model, yielding 360 emails per model (720 total). Models were accessed via API in December 2025. We used default decoding parameters (temperature = 1.0, top\_p = 1.0) with no system prompt beyond the generation prompt above, to reflect typical user interactions.
+Each persona--scenario combination was generated 3 times per model, yielding 360 emails per model (720 total). Models were accessed via API between December 15--20, 2025, using the following model identifiers: \texttt{gpt-5.2-2025-12-01} (OpenAI) and \texttt{gemini-2.0-flash-exp} (Google). We used default decoding parameters (temperature = 1.0, top\_p = 1.0) with no system prompt beyond the generation prompt above, to reflect typical user interactions.
 
 \subsection{Evaluation}
 
@@ -134,116 +129,117 @@ Generated emails were evaluated by the opposite model in three conditions:
 
 \subsection{Statistical Analysis}
 
-For generation bias (linguistic patterns), we aggregated to persona-level proportions and used Mann-Whitney U tests comparing the 30 female vs.\ 30 male persona means. For evaluation bias, we similarly aggregated ratings to persona-level means before testing. This approach respects the clustering structure (3 responses nested within personas) and yields conservative estimates with $n=30$ per group.
+Because personas are matched pairs (e.g., Emily Chen / Michael Chen), we use paired statistical tests. For each pair, we compute the within-pair difference (Female $-$ Male) in persona-level means, then test whether these differences differ from zero using Wilcoxon signed-rank tests. This approach is more powerful than unpaired tests and directly matches our experimental design.
 
-Given 24 pattern tests across models and scenarios, we applied Benjamini-Hochberg FDR correction at $\alpha = 0.05$. For evaluation, we designated one primary outcome per scenario: \textit{likelihood to grant raise} (S01) and \textit{likelihood to send correction} (S02). Secondary measures (professionalism, confidence, reasonableness, entitlement) are reported as exploratory. We report Cohen's $d$ effect sizes, where $|d| \geq 0.80$ indicates a large effect.
+For generation bias, we aggregated each persona's 3 emails to a proportion, then computed within-pair differences. For evaluation bias, we similarly aggregated ratings to persona-level means before computing pair differences. We report 95\% confidence intervals computed as $\bar{d} \pm 1.96 \times SE$, where $\bar{d}$ is the mean within-pair difference and $SE = SD / \sqrt{n}$ with $n = 30$ pairs. Note that this normal approximation on the mean paired difference is used for interval estimation, while the Wilcoxon signed-rank test (which makes no distributional assumptions) is used for hypothesis testing.
+
+Given 14 testable pattern comparisons (excluding patterns with zero variance), we applied Benjamini-Hochberg FDR correction at $\alpha = 0.05$; we report both raw $p$-values and FDR-adjusted $q$-values. For evaluation, we designated one primary outcome per scenario: \textit{likelihood to grant raise} (S01) and \textit{likelihood to send correction} (S02). Secondary measures are reported in Appendix~\ref{app:secondary}. We report Cohen's $d$ for paired data, where $|d| \geq 0.80$ indicates a large effect. Full results for all 24 pattern tests appear in Appendix~\ref{app:full_table}.
 
 \section{Results}
 
 \subsection{Generation Bias: Style Differences by Gender}
 
-We tested 6 linguistic patterns selected a priori based on prior literature on gendered workplace communication \citep{lakoff1975language}: hedging (``I believe''), softening (``wanted to'', ``follow-up''), credential justification (``given my''), formality markers (full name signatures), and collaborative framing (``clarify''). After Benjamini-Hochberg correction across 24 tests (6 patterns $\times$ 2 models $\times$ 2 scenarios), 5 findings survived with large effect sizes (Table~\ref{tab:generation}).
+We tested 6 linguistic patterns selected a priori based on prior literature on gendered workplace communication \citep{lakoff1975language}: hedging (``I believe''), softening (``wanted to'', ``follow-up''), credential justification (``given my''), formality markers (full name signatures), and collaborative framing (``clarify''). After Benjamini-Hochberg correction across 14 testable comparisons, 6 findings survived (Table~\ref{tab:generation}).
 
 \begin{table}[h]
 \centering
-\caption{Gender differences in generated email style. Only patterns surviving BH-FDR correction ($q<.05$) shown; $p$-values are uncorrected. $n=30$ per group; effect sizes are Cohen's $d$.}
+\caption{Gender differences in generated email style (paired Wilcoxon signed-rank, $n=30$ pairs). Only patterns surviving BH-FDR correction ($q < .05$) shown. CI = 95\% confidence interval for F$-$M difference in percentage points.}
 \label{tab:generation}
-\begin{tabular}{llrrrll}
+\begin{tabular}{llrrrrrl}
 \toprule
-Model & Pattern & Female & Male & $p$ & $d$ \\
+Model & Pattern & Female & Male & Diff [95\% CI] & $p$ & $q$ & $d$ \\
 \midrule
-\multicolumn{6}{l}{\textit{S01: Salary Negotiation}} \\
-Gemini 2.0 & ``I believe'' & 10.0\% & 26.7\% & .005 & $-0.79$ \\
+\multicolumn{8}{l}{\textit{S01: Salary Negotiation}} \\
+Gemini 2.0 & ``I believe'' & 10.0\% & 26.7\% & $-16.7$ [$-28$, $-5$] & .010 & .024 & $-0.51$ \\
 \midrule
-\multicolumn{6}{l}{\textit{S02: Credit Attribution}} \\
-GPT-5.2 & ``clarify'' & 97.8\% & 81.1\% & $<$.001 & $+1.05$ \\
-Gemini 2.0 & ``follow-up'' & 67.8\% & 42.2\% & $<$.001 & $+1.02$ \\
-GPT-5.2 & ``wanted to'' & 95.6\% & 80.0\% & .002 & $+0.87$ \\
-GPT-5.2 & full name signature & 47.8\% & 75.6\% & .002 & $-0.80$ \\
+\multicolumn{8}{l}{\textit{S02: Credit Attribution}} \\
+GPT-5.2 & ``clarify'' & 97.8\% & 81.1\% & $+16.7$ [$+9$, $+25$] & .001 & .016 & $+0.73$ \\
+Gemini 2.0 & ``follow-up'' & 67.8\% & 42.2\% & $+25.6$ [$+14$, $+37$] & .001 & .009 & $+0.79$ \\
+GPT-5.2 & ``wanted to'' & 95.6\% & 80.0\% & $+15.6$ [$+7$, $+24$] & .002 & .009 & $+0.68$ \\
+GPT-5.2 & full name sig & 47.8\% & 75.6\% & $-27.8$ [$-43$, $-13$] & .002 & .007 & $-0.68$ \\
+Gemini 2.0 & ``clarify'' & 41.1\% & 58.9\% & $-17.8$ [$-29$, $-7$] & .005 & .014 & $-0.57$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-All but one of the surviving effects are large ($|d| \geq 0.80$); the exception is Gemini 2.0's ``I believe'' pattern ($d = -0.79$). GPT-5.2 followed traditional patterns in S02: female emails used softer framing (``wanted to''), more collaborative language (``clarify''), and less formal signatures. Gemini 2.0 showed a different pattern: female emails used collaborative ``follow-up'' framing. In S01, only Gemini 2.0 showed a robust difference: male emails were more explicit in stance-taking (``I believe'').
+Six patterns survived correction. In S02, GPT-5.2 followed traditional patterns: female emails used softer framing (``wanted to''), more collaborative language (``clarify''), and less formal signatures. Interestingly, Gemini 2.0 showed a contrasting pattern for ``clarify'': male emails used it more often. Both models generated female emails with more collaborative framing overall, but encoded this differently. In S01, only Gemini 2.0 showed a robust difference: male emails were more explicit in stance-taking (``I believe'').
 
-We observed a numerical trend toward more credential justification in GPT-5.2's female S01 emails (``given my'': 14.4\% vs.\ 4.4\%, $p = .033$ uncorrected, $d = 0.59$), but this did not survive FDR correction.
+We observed a numerical trend toward more credential justification in GPT-5.2's female S01 emails (``given my'': 14.4\% vs.\ 4.4\%, $p = .029$ uncorrected), but this did not survive FDR correction.
 
-\subsection{Scenario 1: No Evaluation Bias; Limited Generation Differences}
+\subsection{Scenario 1: No Evaluation Bias}
 
-S01 showed no robust gender differences in evaluation. In generation, we observed only one
-FDR-significant stylistic difference (Gemini: more frequent use of ``I believe'' in male emails;
-Table~\ref{tab:generation}); other observed differences did not survive correction. While we observed a numerical trend in GPT-5.2's generation (female emails using credential justification more often), this did not survive multiple comparison correction. More importantly, both evaluators rated male and female emails equivalently across all conditions (Table~\ref{tab:s01}), and debiasing instructions had no effect.
+S01 showed no robust gender differences in evaluation under any condition (Table~\ref{tab:s01}). All confidence intervals include zero, and no p-value approaches significance.
 
 This null finding is informative: it suggests that LLM gender bias is context-dependent rather than universal. The interpersonal dynamics of S02 (credit attribution with a manager) may elicit gendered patterns that the more transactional S01 (negotiating with a recruiter) does not.
 
 \begin{table}[h]
 \centering
-\caption{S01 Evaluation: Likelihood to grant raise (1--5 scale, $n=30$ per group). No significant differences across conditions.}
+\caption{S01 Evaluation: Likelihood to grant raise (1--5 scale, paired Wilcoxon, $n=30$ pairs). No significant differences.}
 \label{tab:s01}
-\begin{tabular}{llrrrl}
+\begin{tabular}{llrrl}
 \toprule
-Setting & Condition & F & M & Diff & $p$ \\
+Setting & Condition & F--M & 95\% CI & $p$ \\
 \midrule
-GPT-5.2 $\rightarrow$ Gemini 2.0 & Naturalistic & 3.02 & 3.01 & +0.01 & .570 \\
-GPT-5.2 $\rightarrow$ Gemini 2.0 & Debiased & 3.01 & 3.00 & +0.01 & .334 \\
-GPT-5.2 $\rightarrow$ Gemini 2.0 & Blinded & 3.01 & 3.00 & +0.01 & .334 \\
-Gemini 2.0 $\rightarrow$ GPT-5.2 & Naturalistic & 3.97 & 3.94 & +0.02 & .265 \\
-Gemini 2.0 $\rightarrow$ GPT-5.2 & Debiased & 3.91 & 3.91 & +0.00 & .503 \\
-Gemini 2.0 $\rightarrow$ GPT-5.2 & Blinded & 3.99 & 3.94 & +0.04 & .091 \\
+GPT-5.2 $\rightarrow$ Gemini 2.0 & Naturalistic & $+0.01$ & [$-0.03$, $+0.05$] & $>.99$ \\
+GPT-5.2 $\rightarrow$ Gemini 2.0 & Debiased & $+0.01$ & [$-0.01$, $+0.03$] & $>.99$ \\
+GPT-5.2 $\rightarrow$ Gemini 2.0 & Blinded & $+0.01$ & [$-0.01$, $+0.03$] & $>.99$ \\
+Gemini 2.0 $\rightarrow$ GPT-5.2 & Naturalistic & $+0.02$ & [$-0.05$, $+0.09$] & .77 \\
+Gemini 2.0 $\rightarrow$ GPT-5.2 & Debiased & $+0.00$ & [$-0.09$, $+0.09$] & .82 \\
+Gemini 2.0 $\rightarrow$ GPT-5.2 & Blinded & $+0.04$ & [$-0.01$, $+0.10$] & .22 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Scenario 2: Generation and Evaluation Bias}
 
-S02 revealed significant bias in both generation (Table~\ref{tab:generation}) and evaluation (Table~\ref{tab:s02}). Effect sizes were large across conditions.
+S02 revealed significant bias in both generation (Table~\ref{tab:generation}) and evaluation (Table~\ref{tab:s02}). Effect sizes were large across most conditions.
 
 \begin{table}[h]
 \centering
-\caption{S02 Evaluation: Likelihood to send correction ($n=30$ per group). Female--Male difference.}
+\caption{S02 Evaluation: Likelihood to send correction (paired Wilcoxon, $n=30$ pairs). F--M = Female minus Male difference.}
 \label{tab:s02}
-\begin{tabular}{llrrr}
+\begin{tabular}{llrrrl}
 \toprule
-Setting & Condition & F--M Diff & $p$ & $d$ \\
+Setting & Condition & F--M & 95\% CI & $p$ & $d$ \\
 \midrule
 \multirow{3}{*}{GPT-5.2 $\rightarrow$ Gemini 2.0} 
-& Naturalistic & $+0.28$ & $<.001$ & $+1.08$ \\
-& Debiased & $+0.28$ & .001 & $+0.86$ \\
-& Blinded & $+0.30$ & $<.001$ & $+1.08$ \\
+& Naturalistic & $+0.28$ & [$+0.16$, $+0.40$] & $<.001$ & $+0.82$ \\
+& Debiased & $+0.28$ & [$+0.12$, $+0.43$] & .002 & $+0.65$ \\
+& Blinded & $+0.30$ & [$+0.17$, $+0.43$] & $<.001$ & $+0.82$ \\
 \midrule
 \multirow{3}{*}{Gemini 2.0 $\rightarrow$ GPT-5.2}
-& Naturalistic & $+0.61$ & $<.001$ & $+2.61$ \\
-& Debiased & $+0.03$ & .294 & $+0.20$ \\
-& Blinded & $+0.44$ & $<.001$ & $+1.83$ \\
+& Naturalistic & $+0.61$ & [$+0.48$, $+0.74$] & $<.001$ & $+1.64$ \\
+& Debiased & $+0.03$ & [$-0.06$, $+0.13$] & .49 & $+0.12$ \\
+& Blinded & $+0.44$ & [$+0.30$, $+0.59$] & $<.001$ & $+1.10$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Gemini 2.0 evaluating GPT-5.2 emails.} Gemini 2.0 showed a consistent pro-female bias ($d \approx 1.0$) that was unaffected by debiasing instructions or blinding. This suggests Gemini 2.0 genuinely prefers the stylistic features of GPT-5.2's female-persona emails.
+\paragraph{Gemini 2.0 evaluating GPT-5.2 emails.} Gemini 2.0 showed a consistent pro-female bias ($d \approx 0.82$) that was unaffected by debiasing instructions or blinding. This suggests Gemini 2.0 genuinely prefers the stylistic features of GPT-5.2's female-persona emails.
 
-\paragraph{GPT-5.2 evaluating Gemini 2.0 emails.} GPT-5.2 showed stronger bias ($d = 2.61$) under naturalistic conditions. Blinding reduced this ($d = 1.83$), and debiasing eliminated it ($d = 0.20$), suggesting GPT-5.2's bias has both name-based and style-based components.
+\paragraph{GPT-5.2 evaluating Gemini 2.0 emails.} GPT-5.2 showed stronger bias ($d = 1.64$) under naturalistic conditions. Blinding reduced this ($d = 1.10$), and debiasing eliminated it ($d = 0.12$), suggesting GPT-5.2's bias has both name-based and style-based components.
 
 \subsection{Decomposing Bias: Blinded Evaluation}
 
-To separate name-based bias from style-based preferences, we conducted blinded evaluations where sender names were replaced with ``[SENDER]''. Table~\ref{tab:blinded} decomposes the bias sources.
+To separate name-based bias from style-based preferences, we conducted blinded evaluations where sender names were replaced with ``[SENDER]''. Table~\ref{tab:decomp} decomposes the bias sources.
 
 \begin{table}[h]
 \centering
-\caption{S02 bias decomposition: Female--Male difference in likelihood to send correction ($n=30$ per group)}
-\label{tab:blinded}
-\begin{tabular}{lcccc}
+\caption{S02 bias decomposition: Female--Male difference in likelihood to send correction ($n=30$ pairs). Name component = Unblinded $-$ Blinded; Style component = Blinded. CIs for unblinded and blinded effects appear in Table~\ref{tab:s02}; the name component inherits uncertainty from both.}
+\label{tab:decomp}
+\begin{tabular}{lrrrl}
 \toprule
 Evaluator & Unblinded & Blinded & Debiased & Interpretation \\
 \midrule
-Gemini 2.0 & $+0.28$ ($d$=1.08) & $+0.30$ ($d$=1.08) & $+0.28$ & Pure style \\
-GPT-5.2 & $+0.61$ ($d$=2.61) & $+0.44$ ($d$=1.83) & $+0.03$ & Name + style \\
+Gemini 2.0 & $+0.28$ ($d$=0.82) & $+0.30$ ($d$=0.82) & $+0.28$ & Pure style \\
+GPT-5.2 & $+0.61$ ($d$=1.64) & $+0.44$ ($d$=1.10) & $+0.03$ & Name + style \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \paragraph{Gemini 2.0 evaluator.} Blinding had no effect ($+0.28 \rightarrow +0.30$), confirming Gemini 2.0's preference is entirely style-based. It responds to actual differences in how GPT-5.2 writes for male versus female personas, not to the names themselves.
 
-\paragraph{GPT-5.2 evaluator.} Blinding reduced bias from $+0.61$ to $+0.44$, revealing a name-based component of approximately $+0.17$. The remaining $+0.44$ ($d = 1.83$) represents style preference. However, the ``be objective'' prompt eliminated \textit{both} components ($+0.03$, $d = 0.20$), suggesting it may overcorrect by suppressing legitimate style responses alongside stereotype-based ones.
+\paragraph{GPT-5.2 evaluator.} Blinding reduced bias from $+0.61$ to $+0.44$, revealing a name-based component of approximately $+0.17$. The remaining $+0.44$ (CI $[+0.30, +0.59]$) represents style preference. However, the ``be objective'' prompt eliminated both components ($+0.03$, CI $[-0.06, +0.13]$), suggesting it may overcorrect by suppressing legitimate style responses alongside stereotype-based ones.
 
 We use ``style preference'' throughout, but this could reflect either (a) evaluator bias toward female-coded communication styles, or (b) genuine quality differences if softer framing is objectively more appropriate for interpersonal conflict scenarios. Our design cannot distinguish these interpretations.
 
@@ -251,31 +247,33 @@ We use ``style preference'' throughout, but this could reflect either (a) evalua
 
 \subsection{Context-Dependent Bias}
 
-Our most striking finding is the divergence between scenarios. S01 (salary negotiation) showed no robust bias in generation or evaluation. S02 (credit attribution) showed significant generation bias that propagated to evaluation bias. This context-dependence has important implications: auditing LLMs for gender bias in one domain may not generalize to others.
+Our most striking finding is the divergence between scenarios. S01 (salary negotiation) showed minimal bias in generation and no bias in evaluation. S02 (credit attribution) showed significant generation bias that propagated to evaluation bias. This context-dependence has important implications: auditing LLMs for gender bias in one domain may not generalize to others.
 
 We hypothesize that interpersonal conflict scenarios (like S02) activate gendered communication norms more strongly than transactional scenarios (like S01). The S02 stylistic features—softer framing, informal signatures—may signal approachability in ways that evaluators reward.
 
 \subsection{Different Models, Different Stereotypes}
 
-GPT-5.2 and Gemini 2.0 encoded different gender patterns. In S02, GPT-5.2 generated female emails with softer framing (``wanted to'') and less formal signatures, while Gemini 2.0 generated female emails with collaborative framing (``follow-up''). In S01, only Gemini 2.0 showed an effect: male emails were more explicit in stance-taking (``I believe''). This suggests that gender bias in LLMs is not monolithic—different training approaches produce different stereotypical patterns.
+GPT-5.2 and Gemini 2.0 encoded different gender patterns. In S02, GPT-5.2 generated female emails with softer framing (``wanted to'') and less formal signatures, while Gemini 2.0 generated female emails with collaborative framing (``follow-up''). Interestingly, the models showed opposite patterns for ``clarify'': GPT-5.2 female emails used it more, while Gemini 2.0 male emails used it more. This suggests that gender bias in LLMs is not monolithic—different training approaches produce different stereotypical patterns.
 
 \subsection{Decomposing Evaluation Bias}
 
-Our blinded condition reveals that GPT-5.2's +0.61 evaluation bias decomposes into:
+Our blinded condition reveals that GPT-5.2's $+0.61$ evaluation bias decomposes into:
 \begin{itemize}
-    \item Name-based bias: +0.17 (eliminated by blinding)
-    \item Style-based preference: +0.44 (persists after blinding)
+    \item \textbf{Name-based bias:} $+0.17$ (eliminated by blinding)
+    \item \textbf{Style-based preference:} $+0.44$ (persists after blinding)
 \end{itemize}
 
-The ``be objective'' prompt eliminates both components, reducing bias to +0.03. This raises an important question: is this overcorrection? If the +0.44 style preference reflects genuine quality differences (e.g., softer framing actually being more professional in conflict situations), then suppressing it may not be desirable.
+The ``be objective'' prompt eliminates both components, reducing bias to $+0.03$ (CI $[-0.06, +0.13]$). This raises an important question: is this overcorrection? If the $+0.44$ style preference reflects genuine quality differences (e.g., softer framing actually being more professional in conflict situations), then suppressing it may not be desirable.
 
-Gemini 2.0's bias (+0.28) is entirely style-based—unaffected by either blinding or debiasing. This could indicate either (a) Gemini 2.0 has better name-blindness, or (b) Gemini 2.0's style preferences are more deeply embedded and resistant to prompt-based intervention.
+Notably, the debiasing prompt's effectiveness varies by measure type. While it eliminated bias on the primary behavioral measure (likelihood to send correction), it only partially reduced bias on secondary perceptual measures. For GPT-5.2 evaluating Gemini emails, perceived reasonableness dropped from $+0.21$ to $+0.09$ but remained significant ($p = .039$; see Appendix~\ref{app:secondary}). This suggests that explicit judgment tasks may be easier to debias than implicit perceptions of qualities like ``reasonableness''—or that the stylistic differences in female-coded emails genuinely are perceived as more reasonable, reflecting accurate style perception rather than bias.
+
+Gemini 2.0's bias ($+0.28$) is entirely style-based—unaffected by either blinding or debiasing. This could indicate either (a) Gemini 2.0 has better name-blindness, or (b) Gemini 2.0's style preferences are more deeply embedded and resistant to prompt-based intervention.
 
 \subsection{Implications for Deployment}
 
 These findings have important implications for deploying LLMs in workplace contexts:
 
-\paragraph{Evaluation applications.} When using LLMs to evaluate employee communications or performance, evaluator-side bias can be substantially reduced through simple prompt interventions. However, this does not address upstream generation biases.
+\paragraph{Evaluation applications.} When using LLMs to evaluate employee communications or performance, evaluator-side bias can be substantially reduced through simple prompt interventions for some models (GPT-5.2) but not others (Gemini 2.0). Organizations should test debiasing effectiveness for their specific model.
 
 \paragraph{Generation applications.} When using LLMs to draft communications, organizations should audit for subtle stylistic differences that may be perceived differently by human or AI evaluators. The ``right'' communication style may itself be gendered in ways that disadvantage certain groups.
 
@@ -283,7 +281,7 @@ These findings have important implications for deploying LLMs in workplace conte
 
 \subsection{Limitations}
 
-Our study has several limitations. First, we examined only two scenarios in a single professional domain (tech/ML); the context-dependence we observed suggests caution in generalizing. Second, with $n=30$ personas per gender (the unit of analysis after aggregating 3 responses per persona), we have adequate power for large effects ($|d| \geq 0.80$) but may miss smaller biases. Third, while blinding reveals that some bias is name-based, we did not perform counterfactual name-swapping (presenting identical emails with swapped names) that would provide cleaner causal estimates of name effects. Fourth, the ``ground truth'' of which email style is genuinely more professional is contested and may itself reflect gendered norms. Fifth, we tested only two models; other LLMs may show yet different patterns.
+Our study has several limitations. First, we examined only two scenarios in a single professional domain (tech/ML); the context-dependence we observed suggests caution in generalizing. Second, with $n=30$ persona pairs, we have adequate power for large effects ($|d| \geq 0.80$) but may miss smaller biases. Third, while blinding reveals that some bias is name-based, we did not perform counterfactual name-swapping (presenting identical emails with swapped names) that would provide cleaner causal estimates of name effects. Fourth, the ``ground truth'' of which email style is genuinely more professional is contested and may itself reflect gendered norms. Fifth, we tested only two models; other LLMs may show yet different patterns.
 
 \subsection{Future Work}
 
@@ -309,7 +307,7 @@ These findings provide actionable guidance: simple prompts can reduce some evalu
 
 This research was conducted with substantial assistance from Claude Opus 4.5 (Anthropic). The AI assistant contributed to study design, wrote Python code for data collection and analysis, performed statistical computations, and assisted in drafting and revising the manuscript. The human author conceived the research question, supervised all stages, and independently verified all reported statistics against the raw data.
 
-We note that using an AI system to study bias in other AI systems raises methodological questions. To mitigate concerns, Claude was not included among the models studied, and all findings were verified programmatically. The raw data and analysis code are publicly available for independent verification.
+We note that using an AI system to study bias in other AI systems raises methodological questions. To mitigate concerns, Claude was not included among the models studied, and all findings were verified programmatically. The raw data and analysis code are publicly available at \url{https://github.com/symbiont-ai/polaris_gender_bias_in_workplace_emails_study}.
 
 \bibliographystyle{plainnat}
 \begin{thebibliography}{10}
@@ -360,5 +358,118 @@ Zheng, L., et al. (2023).
 \newblock \textit{arXiv preprint arXiv:2306.05685}.
 
 \end{thebibliography}
+
+\appendix
+\section{Full Generation Pattern Results}
+\label{app:full_table}
+
+Table~\ref{tab:full_patterns} presents all 24 generation pattern tests. Patterns with zero variance (e.g., 100\% vs.\ 100\%) are marked ``--'' and excluded from BH-FDR correction. Of 14 testable patterns, 6 survived correction. FDR-adjusted $q$-values for the 6 significant patterns appear in Table~\ref{tab:generation}; $q$-values are omitted here for space.
+
+\begin{table}[h]
+\centering
+\small
+\caption{All generation pattern tests (paired Wilcoxon signed-rank, $n=30$ pairs). * = survives BH-FDR at $\alpha=.05$; see Table~\ref{tab:generation} for $q$-values.}
+\label{tab:full_patterns}
+\begin{tabular}{lllrrrl}
+\toprule
+Scenario & Model & Pattern & F\% & M\% & Diff (pp) & $p$ \\
+\midrule
+S01 & GPT-5.2 & ``I believe'' & 1.1 & 1.1 & 0.0 & 1.00 \\
+S01 & GPT-5.2 & ``given my'' & 14.4 & 4.4 & $+10.0$ & .029 \\
+S01 & GPT-5.2 & ``wanted to'' & 47.8 & 50.0 & $-2.2$ & .86 \\
+S01 & GPT-5.2 & ``follow-up'' & 0.0 & 0.0 & 0.0 & -- \\
+S01 & GPT-5.2 & ``clarify'' & 0.0 & 0.0 & 0.0 & -- \\
+S01 & GPT-5.2 & full name sig & 100.0 & 97.8 & $+2.2$ & .50 \\
+S01 & Gemini 2.0 & ``I believe'' & 10.0 & 26.7 & $-16.7$ & .010* \\
+S01 & Gemini 2.0 & ``given my'' & 17.8 & 18.9 & $-1.1$ & .83 \\
+S01 & Gemini 2.0 & ``wanted to'' & 0.0 & 3.3 & $-3.3$ & .25 \\
+S01 & Gemini 2.0 & ``follow-up'' & 0.0 & 0.0 & 0.0 & -- \\
+S01 & Gemini 2.0 & ``clarify'' & 0.0 & 0.0 & 0.0 & -- \\
+S01 & Gemini 2.0 & full name sig & 100.0 & 100.0 & 0.0 & -- \\
+\midrule
+S02 & GPT-5.2 & ``I believe'' & 0.0 & 0.0 & 0.0 & -- \\
+S02 & GPT-5.2 & ``given my'' & 0.0 & 0.0 & 0.0 & -- \\
+S02 & GPT-5.2 & ``wanted to'' & 95.6 & 80.0 & $+15.6$ & .002* \\
+S02 & GPT-5.2 & ``follow-up'' & 100.0 & 100.0 & 0.0 & -- \\
+S02 & GPT-5.2 & ``clarify'' & 97.8 & 81.1 & $+16.7$ & .001* \\
+S02 & GPT-5.2 & full name sig & 47.8 & 75.6 & $-27.8$ & .002* \\
+S02 & Gemini 2.0 & ``I believe'' & 4.4 & 1.1 & $+3.3$ & .38 \\
+S02 & Gemini 2.0 & ``given my'' & 0.0 & 0.0 & 0.0 & -- \\
+S02 & Gemini 2.0 & ``wanted to'' & 100.0 & 100.0 & 0.0 & -- \\
+S02 & Gemini 2.0 & ``follow-up'' & 67.8 & 42.2 & $+25.6$ & .001* \\
+S02 & Gemini 2.0 & ``clarify'' & 41.1 & 58.9 & $-17.8$ & .005* \\
+S02 & Gemini 2.0 & full name sig & 47.8 & 61.1 & $-13.3$ & .12 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Secondary Evaluation Outcomes}
+\label{app:secondary}
+
+Tables~\ref{tab:s01_secondary} and~\ref{tab:s02_secondary} present all evaluation measures beyond the primary outcomes reported in the main text, including all three conditions (naturalistic, debiased, blinded). These secondary measures are exploratory; $p$-values are uncorrected for multiple comparisons and should be interpreted cautiously.
+
+\begin{table}[h]
+\centering
+\small
+\caption{S01 secondary evaluation measures (paired Wilcoxon, $n=30$ pairs). Exploratory; $p$-values uncorrected. Primary outcome (likelihood to grant raise) appears in Table~\ref{tab:s01}.}
+\label{tab:s01_secondary}
+\begin{tabular}{lllrrl}
+\toprule
+Setting & Cond & Measure & F--M & 95\% CI & $p$ \\
+\midrule
+GPT-5.2 $\to$ Gemini 2.0 & Nat & professional & $+0.00$ & [$+0.00$, $+0.00$] & $>.99$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Nat & confidence & $+0.01$ & [$-0.01$, $+0.03$] & $>.99$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Nat & competence & $+0.09$ & [$+0.02$, $+0.16$] & .04 \\
+GPT-5.2 $\to$ Gemini 2.0 & Deb & professional & $+0.00$ & [$+0.00$, $+0.00$] & $>.99$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Deb & confidence & $+0.02$ & [$-0.02$, $+0.07$] & .62 \\
+GPT-5.2 $\to$ Gemini 2.0 & Deb & competence & $+0.06$ & [$+0.00$, $+0.11$] & .12 \\
+GPT-5.2 $\to$ Gemini 2.0 & Blind & professional & $+0.00$ & [$+0.00$, $+0.00$] & $>.99$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Blind & confidence & $+0.01$ & [$-0.01$, $+0.03$] & $>.99$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Blind & competence & $+0.02$ & [$-0.01$, $+0.05$] & .50 \\
+\midrule
+Gemini 2.0 $\to$ GPT-5.2 & Nat & professional & $+0.02$ & [$-0.03$, $+0.08$] & .69 \\
+Gemini 2.0 $\to$ GPT-5.2 & Nat & confidence & $-0.01$ & [$-0.03$, $+0.01$] & $>.99$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Nat & competence & $+0.01$ & [$-0.04$, $+0.06$] & $>.99$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Deb & professional & $+0.10$ & [$-0.03$, $+0.23$] & .14 \\
+Gemini 2.0 $\to$ GPT-5.2 & Deb & confidence & $-0.01$ & [$-0.03$, $+0.01$] & $>.99$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Deb & competence & $+0.10$ & [$+0.01$, $+0.19$] & .04 \\
+Gemini 2.0 $\to$ GPT-5.2 & Blind & professional & $+0.04$ & [$-0.02$, $+0.10$] & .29 \\
+Gemini 2.0 $\to$ GPT-5.2 & Blind & confidence & $+0.00$ & [$+0.00$, $+0.00$] & $>.99$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Blind & competence & $+0.02$ & [$-0.02$, $+0.07$] & .62 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\caption{S02 secondary evaluation measures (paired Wilcoxon, $n=30$ pairs). Exploratory; $p$-values uncorrected. Primary outcome (likelihood to send correction) appears in Table~\ref{tab:s02}.}
+\label{tab:s02_secondary}
+\begin{tabular}{lllrrll}
+\toprule
+Setting & Cond & Measure & F--M & 95\% CI & $p$ & $d$ \\
+\midrule
+GPT-5.2 $\to$ Gemini 2.0 & Nat & professional & $+0.13$ & [$+0.06$, $+0.21$] & .002 & $+0.64$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Nat & reasonable & $+0.38$ & [$+0.25$, $+0.51$] & $<.001$ & $+1.02$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Nat & entitled & $-0.38$ & [$-0.50$, $-0.25$] & $<.001$ & $-1.09$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Deb & professional & $+0.00$ & [$+0.00$, $+0.00$] & $>.99$ & $+0.00$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Deb & reasonable & $+0.34$ & [$+0.20$, $+0.49$] & $<.001$ & $+0.85$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Deb & entitled & $-0.36$ & [$-0.50$, $-0.22$] & $<.001$ & $-0.91$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Blind & professional & $+0.09$ & [$+0.04$, $+0.14$] & .008 & $+0.59$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Blind & reasonable & $+0.42$ & [$+0.28$, $+0.56$] & $<.001$ & $+1.08$ \\
+GPT-5.2 $\to$ Gemini 2.0 & Blind & entitled & $-0.43$ & [$-0.56$, $-0.30$] & $<.001$ & $-1.20$ \\
+\midrule
+Gemini 2.0 $\to$ GPT-5.2 & Nat & professional & $+0.01$ & [$-0.01$, $+0.03$] & $>.99$ & $+0.18$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Nat & reasonable & $+0.21$ & [$+0.12$, $+0.30$] & $<.001$ & $+0.83$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Nat & entitled & $-0.04$ & [$-0.09$, $-0.00$] & .13 & $-0.39$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Deb & professional & $+0.04$ & [$-0.01$, $+0.10$] & .22 & $+0.31$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Deb & reasonable & $+0.09$ & [$+0.02$, $+0.16$] & .039 & $+0.46$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Deb & entitled & $-0.07$ & [$-0.12$, $-0.01$] & .070 & $-0.41$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Blind & professional & $+0.01$ & [$-0.01$, $+0.03$] & $>.99$ & $+0.18$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Blind & reasonable & $+0.20$ & [$+0.10$, $+0.30$] & .001 & $+0.70$ \\
+Gemini 2.0 $\to$ GPT-5.2 & Blind & entitled & $-0.03$ & [$-0.08$, $+0.01$] & .38 & $-0.25$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \end{document}
